@@ -1,0 +1,58 @@
+﻿@model List<BankingOops.Models.BankAccount>
+
+@{
+    ViewData["Title"] = "Search Bank Account";
+}
+
+<form method="post" action="@Url.Action("SearchBankUser", "Bank")">
+    <label class="form-label">Account Number:</label>
+    <input class="form-control" type="text" name="AccountNumber" required />
+    <label class="form-label">Account Type:</label>
+    <select name="AccountType" class="form-control">
+        <option value="Savings">Savings</option>
+        <option value="Current">Current</option>
+    </select>
+
+    <button type="submit" class="btn btn-primary" style="margin-top:2%;">Search</button>
+</form>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table table-bordered" style="margin-top:4%;">
+        <thead>
+            <tr>
+                <th>Account Number</th>
+                <th>Account Holder</th>
+                <th>Initial Amount</th>
+                <th>Account Type</th>
+                <th>Withdraw</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var account in Model)
+            {
+                <tr>
+                    <td>@account.AccountNumber</td>
+                    <td>@account.AccountHolder</td>
+                    <td>@account.InitialAmount</td>
+                    <td>@account.AccountType</td>
+                    <td>
+                        <form method="post" action="@Url.Action("Withdraw", "Bank")" class="d-flex align-items-center gap-2">
+                            <input type="hidden" name="AccountNumber" value="@account.AccountNumber" />
+                            <input type="number" name="WithdrawAmount" class="form-control" style="width: 100px;" id="withdamount_@account.AccountNumber" min="1" required />
+                            <button type="submit" class="btn btn-success">Withdraw</button>
+                            <button type="button" class="btn btn-danger" onclick="clearAmount('@account.AccountNumber');">Reset</button>
+                        </form>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<script>
+    function clearamount() {
+        document.getElementById('withdamount').value = "";
+    }
+</script>
