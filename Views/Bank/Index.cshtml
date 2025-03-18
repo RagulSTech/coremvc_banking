@@ -3,29 +3,52 @@
 @{
     ViewData["Title"] = "Search Bank Account";
 }
-
+@{
+    @if (!string.IsNullOrEmpty(ViewBag.BankUser))
+    {
+        <div class="alert alert-danger" role="alert">
+            ⚠️ @ViewBag.BankUser
+        </div>
+    }
+}
 <form method="post" action="@Url.Action("SearchBankUser", "Bank")">
-    <label class="form-label">Account Number:</label>
-    <input class="form-control" type="text" name="AccountNumber" required />
-    <label class="form-label">Account Type:</label>
-    <select name="AccountType" class="form-control">
-        <option value="Savings">Savings</option>
-        <option value="Current">Current</option>
-    </select>
+    <div style="width:25%;">
+        <label class="form-label"><b>Account Number :</b></label>
+        <input class="form-control" type="text" name="AccountNumber" required />
+        <label class="form-label"><b>Account Type :</b></label>
+        <select name="AccountType" class="form-control">
+            <option value="Savings">Savings</option>
+            <option value="Current">Current</option>
+        </select>
 
-    <button type="submit" class="btn btn-primary" style="margin-top:2%;">Search</button>
+        <button type="submit" class="btn btn-primary" style="margin-top:7%;">Search</button>
+    </div>
+    
 </form>
 
 @if (Model != null && Model.Any())
 {
-    <table class="table table-bordered" style="margin-top:4%;">
-        <thead>
+    <div class="text-end">
+        @* <a href="@Url.Action("GetTransaction", "Bank", new { AccountNumber = Model[0].AccountNumber })"
+           class="btn btn-outline-info mb-3">
+            📜 View Transaction Details
+        </a> *@
+        <a href="javascript:void(0);"
+           onclick="loadTransactionFrame(@Model[0].AccountNumber);"
+           class="btn btn-outline-info mb-3">
+            📜 View Transaction Details
+        </a>
+
+
+    </div>
+    <table class="table table-bordered shadow-sm rounded text-center" style="margin-top: 2%;">
+        <thead class="table-dark">
             <tr>
                 <th>Account Number</th>
                 <th>Account Holder</th>
                 <th>Initial Amount</th>
                 <th>Account Type</th>
-                <th>Withdraw</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -34,25 +57,163 @@
                 <tr>
                     <td>@account.AccountNumber</td>
                     <td>@account.AccountHolder</td>
-                    <td>@account.InitialAmount</td>
+                    <td>₹@account.InitialAmount</td>
                     <td>@account.AccountType</td>
-                    <td>
-                        <form method="post" action="@Url.Action("Withdraw", "Bank")" class="d-flex align-items-center gap-2">
+                    <td class="d-flex flex-column align-items-center">
+                        <!-- Dropdown Selection -->
+                        <select class="form-select w-auto mb-2"
+                                onchange="toggleTransactionForm(this, '@account.AccountNumber')">
+                            <option value="">Select</option>
+                            <option value="withdraw">Withdraw</option>
+                            <option value="deposit">Deposit</option>
+                        </select>
+
+                        <!-- Withdraw Form -->
+                        <form method="post" action="@Url.Action("Withdraw", "Bank")"
+                              class="transaction-form d-none"
+                              id="withdrawForm_@account.AccountNumber"
+                              onsubmit="return validateWithdraw(this, '@account.AccountNumber', @account.InitialAmount);">
                             <input type="hidden" name="AccountNumber" value="@account.AccountNumber" />
-                            <input type="number" name="WithdrawAmount" class="form-control" style="width: 100px;" id="withdamount_@account.AccountNumber" min="1" required />
-                            <button type="submit" class="btn btn-success">Withdraw</button>
-                            <button type="button" class="btn btn-danger" onclick="clearAmount('@account.AccountNumber');">Reset</button>
+                            <input type="hidden" name="AccountType" value="@account.AccountType" />
+                            <input type="number" name="WithdrawAmount" class="form-control mt-2 text-center"
+                                   style="width: 130px;" id="withdamount_@account.AccountNumber"
+                                   min="1" required placeholder="Enter Amount" />
+                            <button type="submit" class="btn btn-success btn-sm mt-2 w-100">Withdraw</button>
+                            <button type="button" class="btn btn-warning btn-sm mt-1 w-100"
+                                    onclick="clearAmount('@account.AccountNumber');">
+                                Reset
+                            </button>
+                        </form>
+
+                        <!-- Deposit Form -->
+                        <form method="post" action="@Url.Action("Deposit", "Bank")"
+                              class="transaction-form d-none"
+                              id="depositForm_@account.AccountNumber">
+                            <input type="hidden" name="AccountNumber" value="@account.AccountNumber" />
+                            <input type="hidden" name="AccountType" value="@account.AccountType" />
+                            <input type="number" name="DepositAmount" class="form-control mt-2 text-center"
+                                   style="width: 130px;" required placeholder="Enter Amount" />
+                            <button type="submit" class="btn btn-primary btn-sm mt-2 w-100">Deposit</button>
+                            <button type="button" class="btn btn-danger btn-sm mt-1 w-100"
+                                    onclick="clearAmount('@account.AccountNumber');">
+                                Reset
+                            </button>
                         </form>
                     </td>
-
                 </tr>
             }
         </tbody>
     </table>
 }
-
+<!-- Transaction History Modal -->
+<div id="transactionModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeTransactionFrame()">&times;</span>
+        <iframe id="transactionFrame" src="" style="width: 100%; height: 400px; border: none;"></iframe>
+    </div>
+</div>
 <script>
-    function clearamount() {
-        document.getElementById('withdamount').value = "";
+    function loadTransactionFrame(accountNumber) {
+        var frame = document.getElementById("transactionFrame");
+        frame.src = '@Url.Action("GetTransaction", "Bank")' + '?accountNumber=' + accountNumber+'&pagelayout='+1;
+
+        // Show modal with a smooth animation
+        document.getElementById("transactionModal").style.display = "flex";
+    }
+
+    function closeTransactionFrame() {
+        var modal = document.getElementById("transactionModal");
+        modal.style.display = "none"; // Hide modal
+        document.getElementById("transactionFrame").src = ""; // Stop loading iframe
     }
 </script>
+
+
+
+
+<script>
+    function toggleTransactionForm(selectElement, accountNumber) {
+        let withdrawForm = document.getElementById('withdrawForm_' + accountNumber);
+        let depositForm = document.getElementById('depositForm_' + accountNumber);
+
+        // Hide both forms initially
+        withdrawForm.classList.add('d-none');
+        depositForm.classList.add('d-none');
+
+        // Show the selected form
+        if (selectElement.value === "withdraw") {
+            withdrawForm.classList.remove('d-none');
+        } else if (selectElement.value === "deposit") {
+            depositForm.classList.remove('d-none');
+        }
+    }
+
+    function clearAmount(accountNumber) {
+        document.getElementById('withdamount_' + accountNumber).value = "";
+    }
+
+    function validateWithdraw(form, accountNumber, initialAmount) {
+        let withdrawInput = document.getElementById('withdamount_' + accountNumber);
+        let withdrawAmount = parseFloat(withdrawInput.value);
+        let remainingBalance = initialAmount - withdrawAmount;
+
+        if (withdrawAmount <= 0 || isNaN(withdrawAmount)) {
+            alert("❌ Please enter a valid withdrawal amount.");
+            return false;
+        }
+
+        if (remainingBalance < 500) {
+            return confirm("⚠️ Your balance will fall below ₹500! Do you want to proceed?");
+        }
+
+        return confirm("✅ Do you want to confirm this withdrawal?");
+    }
+</script>
+<style>
+    /* Full-Screen Overlay Background */
+.modal-overlay {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6); /* Darker background for better visibility */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Ensures modal is above everything */
+}
+
+/* Modal Box */
+.modal-content {
+    background: white;
+    width: 60%;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Close Button */
+.close-btn {
+    position: absolute;
+    top: 4px;
+    right: 45px;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+/* Smooth Fade-in Animation */
+@@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+</style>

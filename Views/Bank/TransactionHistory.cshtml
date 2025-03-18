@@ -1,0 +1,60 @@
+﻿@model List<TransactionHistory>
+@if(ViewBag.pagelayout==1){
+    Layout = "~/Views/Shared/_CustomLayout.cshtml";
+}
+
+<h3 class="mt-4">Transaction History</h3>
+<form method="get" action="@Url.Action("GetTransaction","Bank")">
+    <div style="width:25%;">
+        <label class="form-label"><b>Account Number :</b></label>
+        <input type="text" class="form-control" name="accountNumber" required />
+        <input type="hidden" name="pagelayout" value="0" />     
+        <button type="submit" class="btn btn-primary" style="margin-top:3%;">Submit</button>
+    </div>
+</form>
+@if (Model != null && Model.Any())
+{
+    <table class="table table-bordered shadow-sm rounded text-center mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Transaction ID</th>
+                <th>Account Number</th>
+                <th>Transaction Type</th>
+                <th>Amount</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var transaction in Model)
+            {
+                <tr>
+                    <td>@transaction.TransactionId</td>
+                    <td>@transaction.AccountNumber</td>
+                    <td>@transaction.TransactionType</td>
+                    <td>₹@transaction.Amount</td>
+                    <td>@transaction.TransactionDate.ToString("yyyy-MM-dd HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <table class="table table-bordered shadow-sm rounded text-center mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Transaction ID</th>
+                <th>Account Number</th>
+                <th>Transaction Type</th>
+                <th>Amount (₹)</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="5" style="text-align:left;">No Records Found.</td>
+            </tr>
+        </tbody>
+    </table>
+}
+

@@ -1,0 +1,45 @@
+﻿@model List<BankingOops.Models.BankAccount>
+
+<form method="post" action="@Url.Action("GetUsers","Bank")">
+    <div style="width:25%;">
+        <label class="form-label"><b>Account Type :</b></label>
+        <select name="AccountType" class="form-control">
+            <option value="All">All</option>
+            <option value="Savings">Savings</option>
+            <option value="Current">Current</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="margin-top:2%;"><b>Search Account</b></button>
+</form>
+
+@if (Model != null && Model.Any())
+{
+    <div class="table-responsive mt-4">
+        <table class="table table-striped table-hover table-bordered shadow-lg">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>Account Number</th>
+                    <th>Account Holder</th>
+                    <th>Initial Amount</th>
+                    <th>Account Type</th>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                @foreach (var account in Model)
+                {
+                    <tr>
+                        <td>@account.AccountNumber</td>
+                        <td>@account.AccountHolder</td>
+                        <td class="text-success fw-bold">₹ @account.InitialAmount</td>
+                        <td>
+                            <span class="badge @(account.AccountType == "Savings" ? "bg-success" : "bg-primary")">
+                                @account.AccountType
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

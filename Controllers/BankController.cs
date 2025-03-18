@@ -20,13 +20,55 @@ namespace BankingOops.Controllers
         public IActionResult SearchBankUser(long AccountNumber, string AccountType)
         {
             var filterdata = _bankService.SearchBankUser(AccountNumber, AccountType);
-            return View("Index",filterdata); 
+            if (filterdata.Count == 0)
+            {
+                ViewBag.BankUser = "Invalid User!";   
+                return View("Index");   
+            }
+
+            HttpContext.Session.SetString("AccountNumber", AccountNumber.ToString());
+
+            return View("Index", filterdata);
         }
+
         [HttpPost]
-        public IActionResult Withdraw(long AccountNumber, double WithdrawAmount)
+        public IActionResult Withdraw(long AccountNumber, decimal WithdrawAmount, string AccountType)
         {
             bool BalanceAmount = _bankService.Withdraw(AccountNumber, WithdrawAmount);
+            var filterdata = _bankService.SearchBankUser(AccountNumber, AccountType);
+            return View("Index", filterdata);
+        }
+        [HttpPost]
+        public IActionResult Deposit(long AccountNumber, string AccountType, decimal DepositAmount)
+        {
+            bool BalanceAmount = _bankService.Deposite(AccountNumber, AccountType, DepositAmount);
+            var filterdata = _bankService.SearchBankUser(AccountNumber, AccountType);
+            return View("Index", filterdata);
+        }
+
+        public IActionResult Users()
+        {
             return View();
+        }
+        public IActionResult GetUsers(string AccountType)
+        {
+            var filterdata = _bankService.UserList(AccountType);
+            return View("Users",filterdata);
+        }
+        public IActionResult TransactionHistory()
+        {
+            return View();
+        }
+        [HttpGet]
+        public IActionResult GetTransaction(long accountNumber, int pagelayout)
+        {
+            var transactions = _bankService.GetLastTransactions(accountNumber, 10);
+            ViewBag.pagelayout = pagelayout;
+            if (transactions != null)
+            {
+                return View("TransactionHistory",transactions);
+            }
+            return View("TransactionHistory");
         }
     }
 }
