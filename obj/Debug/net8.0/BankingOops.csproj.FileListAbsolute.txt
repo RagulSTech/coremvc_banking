@@ -9,6 +9,7 @@ C:\Users\80128\source\repos\BankingOops\BankingOops\bin\Debug\net8.0\BankingOops
 C:\Users\80128\source\repos\BankingOops\BankingOops\bin\Debug\net8.0\Azure.Core.dll
 C:\Users\80128\source\repos\BankingOops\BankingOops\bin\Debug\net8.0\Azure.Identity.dll
 C:\Users\80128\source\repos\BankingOops\BankingOops\bin\Debug\net8.0\Humanizer.dll
+C:\Users\80128\source\repos\BankingOops\BankingOops\bin\Debug\net8.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
 C:\Users\80128\source\repos\BankingOops\BankingOops\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Users\80128\source\repos\BankingOops\BankingOops\bin\Debug\net8.0\Microsoft.Build.Locator.dll
 C:\Users\80128\source\repos\BankingOops\BankingOops\bin\Debug\net8.0\Microsoft.CodeAnalysis.dll

@@ -16,6 +16,10 @@ namespace BankingOops.Controllers
         {
             return View(new List<BankAccount>());
         }
+        public IActionResult AddBankUser()
+        {
+            return View();
+        }
         [HttpPost]
         public IActionResult SearchBankUser(long AccountNumber, string AccountType)
         {
